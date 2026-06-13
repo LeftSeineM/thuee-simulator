@@ -2,7 +2,7 @@ import "./styles.css";
 
 const GPA_FLOOR = 3.6;
 const GPA_CEIL = 4.0;
-const GPA_SWING_MULTIPLIER = 5;
+const GPA_SWING_MULTIPLIER = 25;
 const SEMESTER_FREE_WEEKS = 2;
 const MIDTERM_WEEK = 1;
 const FINAL_WEEK = 2;
@@ -11,7 +11,7 @@ const YEARS = ["大一", "大二", "大三", "大四"];
 const TOTAL_PROGRESS_STEPS = 4 * (2 * (SEMESTER_FREE_WEEKS + 2) + 1) + 1;
 
 const state = {
-  screen: "name",
+  screen: "welcome",
   playerName: "未命名同学",
   gpa: 4.0,
   stamina: 85,
@@ -55,6 +55,14 @@ const talentDefs = [
   ["management", "统筹管理", "学生会、科协、班级多任务并行时，精力透支减少，紧急工作抗压增强。"],
   ["resilience", "身心韧性", "熬夜、高压、连续忙碌的身心损耗降低，休息恢复效率提升。"],
   ["empathy", "共情社交", "兄弟社交、情感生活、人际往来的正向收益提升，社交内耗减少。"]
+];
+
+const professorQuotes = [
+  "工程不是把公式背下来，而是知道什么时候公式还能相信，什么时候该看波形。",
+  "电路会说真话，示波器也会说真话，真正不稳定的往往是你以为已经想清楚的假设。",
+  "不要怕 debug，debug 是电子系学生和现实世界第一次正式握手。",
+  "系统的瓶颈不一定在最复杂的模块，很多时候藏在你没认真量过的接口上。",
+  "会做题是输入阻抗，会做事是输出能力，中间还要有足够稳定的增益。"
 ];
 
 const actions = [
@@ -183,6 +191,19 @@ const eventBank = [
   event("family", "家里寄来一箱补给", "水果、零食和一张手写便签塞满纸箱。你突然想起，自己不是一个人在扛。", { mind: 11, health: 5, joy: 8 }, "分给室友一起吃", { network: 5, joy: 4 }, "打电话报平安", { mind: 5, balance: 2 }),
   event("love", "临时纪念日撞上 DDL", "日历提醒和课程 DDL 在同一天亮起。浪漫和责任都没有错，只是时间很窄。", { gpa: -0.008, mind: -5, joy: 6 }, "提前沟通改期", { balance: 6, mind: 3 }, "压缩任务赴约", { joy: 7, stamina: -5, gpa: -0.004 })
 ];
+
+const eeSignalEvents = [
+  event("academic", "信号与系统习题产生相位差", "卷积、傅里叶、拉普拉斯在草稿纸上排队，你突然理解了什么叫输入是周末，输出是头秃。", { gpa: -0.006, stamina: -6, mind: -7, knowledge: 8 }, "重画时域频域图", { knowledge: 7, mind: -2 }, "找同学互相讲一遍", { network: 4, knowledge: 4 }),
+  event("academic", "模电小测考到偏置点", "题目一出来，你感觉自己的工作点也跟着漂移。稳住直流分析，才谈得上交流小信号。", { gpa: -0.008, mind: -8, knowledge: 7 }, "回去补晶体管模型", { knowledge: 8, stamina: -3 }, "整理易错参数", { gpa: 0.004, balance: 3 }),
+  event("research", "FPGA 时序约束报红", "Vivado 的红字像夜色一样铺满屏幕。你知道这不是玄学，是路径、时钟和耐心的共同审判。", { gpa: -0.004, stamina: -8, mind: -10, research: 11 }, "逐条看 timing report", { research: 8, mind: -3 }, "请师兄看约束文件", { network: 5, research: 4 }),
+  event("research", "示波器探头补偿没调好", "波形边沿看起来很奇怪，你差点开始怀疑人生，最后发现先该怀疑探头。", { gpa: -0.003, mind: -6, research: 8, knowledge: 5 }, "重新校准探头", { research: 5, knowledge: 3 }, "写进实验 checklist", { balance: 5 }),
+  event("research", "焊台温度飘了", "锡点迟迟不上，板子却越来越烫。你第一次真切感到工艺参数也有脾气。", { stamina: -7, mind: -6, health: -3, research: 8 }, "换烙铁头重焊", { research: 5, stamina: -3 }, "停下来检查温控", { balance: 4, health: 3 }),
+  event("service", "科协培训讲到 ADC 采样", "台下新生问混叠是什么，你忽然发现能把一件事讲明白，比自己会做更难。", { gpa: 0.002, stamina: -5, mind: -4, service: 9, knowledge: 5 }, "现场画采样示意", { service: 5, network: 4 }, "课后补充讲义", { knowledge: 4, stamina: -3 }),
+  event("friends", "宿舍讨论芯片行业周期", "有人说先进制程，有人说模拟刚需，有人说先把明天的实验报告交了。现实和理想在桌边一起冒热气。", { gpa: -0.003, mind: 7, network: 8, knowledge: 3 }, "认真聊职业路线", { balance: 5, network: 4 }, "转回眼前作业", { knowledge: 4, stamina: -2 }),
+  event("love", "约会地点改到电子系馆外", "你们在系馆外等风停，身后灯火像一块巨大的 PCB。浪漫有时也带一点松香味。", { gpa: -0.006, mind: 13, joy: 10, health: 2 }, "认真陪伴", { joy: 6, mind: 4 }, "约好晚点补进度", { balance: 4, gpa: 0.002 })
+];
+
+eventBank.push(...eeSignalEvents);
 
 const annualEvents = [
   {
@@ -368,6 +389,7 @@ function timeline() {
 }
 
 function screen() {
+  if (state.screen === "welcome") return welcomeScreen();
   if (state.screen === "name") return nameScreen();
   if (state.screen === "persona") return personaScreen();
   if (state.screen === "talents") return talentScreen();
@@ -380,9 +402,23 @@ function screen() {
   return endingScreen();
 }
 
-function nameScreen() {
+function welcomeScreen() {
+  const quote = professorQuotes[Math.floor(Math.random() * professorQuotes.length)];
   return `
     <div class="eyebrow">Admission Gateway</div>
+    <h1>电子系开机广播</h1>
+    <div class="quote-panel">
+      <span>THUEE Boot Signal</span>
+      <b>${quote}</b>
+    </div>
+    <p class="lead">示波器亮起，课表加载，四年的 EE 信号即将输入系统。接下来，每一页都只向前翻，不回退，不读档。</p>
+    <div class="footer-actions"><button class="btn" data-action="to-name">进入新生登记</button></div>
+  `;
+}
+
+function nameScreen() {
+  return `
+    <div class="eyebrow">Student Registry</div>
     <h1>开启你的 EE 四年人生</h1>
     <p class="lead">输入你的专属昵称。接下来，每一周都只有一个选择，每一页都不能回头；你不会被学业击穿，但体力、精神和健康会诚实记录每一次取舍。</p>
     <div class="form-row">
@@ -396,7 +432,7 @@ function personaScreen() {
   return `
     <div class="eyebrow">Freshman Profile</div>
     <h2>无 44 班新生档案</h2>
-    <p class="lead">你是清华大学电子工程系无 44 班新生，年级前列精英底子，天赋出众、潜力十足。你的四年没有学业崩盘的风险，但需要在繁重的学习、科研、学生工作、生活社交中，学会取舍与平衡，度过独一无二的 EE 大学生涯。</p>
+    <p class="lead">你是清华大学电子工程系无 44 班新生，年级前列精英底子，天赋出众、潜力十足。你的四年没有学业崩盘的风险，但会在电路实验、信号系统、焊板 debug、组会汇报、学生工作和真实生活之间反复取舍，度过独一无二的 EE 大学生涯。</p>
     <div class="meta-grid">
       <div class="metric"><span class="meta">GPA</span><b>4.0</b></div>
       <div class="metric"><span class="meta">体力</span><b>85</b></div>
@@ -576,6 +612,7 @@ function restScreen() {
 
 function endingScreen() {
   const ending = chooseEnding();
+  const story = endingNarrative();
   return `
     <div class="eyebrow">Graduation</div>
     <h1>${ending.title}</h1>
@@ -588,6 +625,11 @@ function endingScreen() {
     </div>
     <div class="tag-row">
       <span class="tag">课内学习</span><span class="tag">科研项目</span><span class="tag">社会工作</span><span class="tag">睡眠健康</span><span class="tag">兄弟社交</span><span class="tag">娱乐情感</span>
+    </div>
+    <div class="ending-story">
+      <div class="section-title">这段经历说明了什么</div>
+      <p>${story.overview}</p>
+      <p>${story.detail}</p>
     </div>
     <div class="footer-actions"><button class="btn secondary" data-action="restart">重新开局</button></div>
   `;
@@ -608,6 +650,7 @@ function bind() {
 
 function handle(action, data) {
   if (state.locked) return;
+  if (action === "to-name") transition("name");
   if (action === "confirm-name") {
     const value = document.querySelector("#nameInput").value.trim();
     state.playerName = value || "无名 EE 人";
@@ -865,6 +908,30 @@ function chooseEnding() {
     return { title: "松弛成长追梦人", text: "你把身心状态守得很好，也稳步完成了专业成长，最终进入稳定优质的对口岗位。" };
   }
   return { title: "平平无奇顺利毕业", text: "没有夸张高光，也没有短板遗憾。你安稳走完四年 EE 生涯，带着清晰的自我认知毕业。" };
+}
+
+function endingNarrative() {
+  const h = state.hidden;
+  const strengths = [
+    ["课内学习", h.knowledge],
+    ["科研项目", h.research],
+    ["组织统筹", h.service],
+    ["人际连接", h.network],
+    ["身心平衡", h.balance + h.joy]
+  ].sort((a, b) => b[1] - a[1]);
+  const top = strengths[0][0];
+  const second = strengths[1][0];
+  const pressure = [
+    ["体力", state.stamina],
+    ["精神", state.mind],
+    ["健康", state.health]
+  ].sort((a, b) => a[1] - b[1])[0];
+  const gpaTone = state.gpa >= 3.9 ? "你把成绩维持在非常漂亮的位置，但满绩之后的正收益不会被保存，任何放松和挤占都会真实留下波动。"
+    : state.gpa >= 3.75 ? "你的 GPA 经历过明显起伏，最后仍然保持在优秀区间，说明这四年并不是单纯刷分，而是在不断校准节奏。"
+      : "你的 GPA 被多任务生活拉扯过，但始终守住了底线，成绩成为压力的读数，而不是失败的判决。";
+  const overview = `这一局最突出的两条线是「${top}」和「${second}」。你不是沿着单一最优解前进，而是在平常周、考试周、年度节点之间反复切换工作点：有时像调电路一样追求稳定增益，有时又必须接受噪声、漂移和临时 DDL。`;
+  const detail = `${gpaTone} 到毕业时，${pressure[0]}是最需要警惕的状态变量，说明真正的难度不在挂科，而在长期高压下怎样不把自己耗空。那些焊板、示波器、FPGA 时序、信号系统和组会里的选择，最后共同构成了你的 EE 版本成长曲线。`;
+  return { overview, detail };
 }
 
 function drawCampus() {
