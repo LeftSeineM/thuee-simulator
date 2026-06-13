@@ -612,7 +612,19 @@ h2 {
   html,
   body,
   #app {
-    height: 100dvh;
+    min-height: 100dvh;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  .game-shell {
+    min-height: 100dvh;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 
   .topbar {
@@ -713,20 +725,17 @@ h2 {
   }
 
   .stage {
-    padding: 138px 12px 42px;
+    position: relative;
+    min-height: 100dvh;
+    padding: 138px 12px 54px;
     align-items: start;
     justify-items: center;
   }
 
   .page {
-    max-height: calc(100dvh - 188px);
-    overflow-y: auto;
+    max-height: none;
+    overflow: visible;
     padding: 16px;
-    scrollbar-width: none;
-  }
-
-  .page::-webkit-scrollbar {
-    display: none;
   }
 
   h1 {
